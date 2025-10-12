@@ -1,4 +1,4 @@
-🌾#Crop Optimization App
+🌾Crop Optimization App
 Overview
 
 The Crop Optimization App is a data-driven mobile solution designed to empower farmers with real-time insights to maximize crop yields. The app integrates weather data, soil fertility information, and a comprehensive crop database to provide personalized fertilizer recommendations, optimal application methods, and crop management suggestions.
