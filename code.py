@@ -1,5 +1,4 @@
-final code: ! pip install streamlit -q
-!wget -q -O - ipv4.icanhazip.com! streamlit run app.py & npx localtunnel --port 8501 file name:crop2.csv app code:import streamlit as st
+import streamlit as st
 import requests
 import pandas as pd
 
