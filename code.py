@@ -2,133 +2,152 @@ import streamlit as st
 import requests
 import pandas as pd
 
-# ------------------------- PAGE CONFIG -------------------------
-st.set_page_config(
-    page_title="🌾 Smart Agriculture System",
-    page_icon="🌱",
-    layout="wide",
-)
+# ---------------------------
+#  🌍  LANGUAGE TRANSLATIONS 
+# ---------------------------
 
-# -------------------- BEAUTIFUL BACKGROUND ---------------------
-page_bg = """
-<style>
-[data-testid="stAppViewContainer"] {
-    background-image: url('https://images.pexels.com/photos/1675273/pexels-photo-1675273.jpeg');
-    background-size: cover;
-    background-position: center;
-}
-
-[data-testid="stHeader"] {
-    background-color: rgba(0, 0, 0, 0);
-}
-
-.card {
-    background-color: rgba(255, 255, 255, 0.85);
-    padding: 20px;
-    border-radius: 20px;
-    box-shadow: 0px 4px 25px rgba(0,0,0,0.25);
-    margin-bottom: 20px;
-}
-
-.big-title {
-    font-size: 40px;
-    font-weight: 800;
-    color: #1b5e20;
-    text-shadow: 2px 2px #ffffff;
-}
-</style>
-"""
-st.markdown(page_bg, unsafe_allow_html=True)
-
-# ---------------- LANGUAGE TRANSLATION -------------------------
 language_translations = {
-    'English': {'title': '🌾 Agriculture Recommendation System', 'location': '📍 Enter your location (State name)', 'crop': '🌱 Select Crop Type',
-                'get_recommendation': '🚜 Get Recommendations', 'current_temp': '🌡️ Current Temperature', 'weather_desc': '☁️ Weather Description',
-                'soil_moisture': '💧 Soil Moisture', 'soil_temp': '🌡️ Soil Temperature', 'recommendations': '📌 Recommendations',
-                'recommended_crop': '🌾 Recommended Crop', 'fertilizer': '🧪 Recommended Fertilizer', 'fertilizer_brand': '🏷️ Best & Cheap Fertilizer Brand',
-                'mixture_field': '🧬 Mixture Composition for Field', 'price_increase': '📈 Expected Price Value Increase',
-                'acre_mixture': '🌾 Mixture Composition per Acre'},
-    # --- You already gave full dictionary, I kept it same ---
+    'English': {'title': '🌾 Agriculture Recommendation System', 'location': '📍 Enter your location (State name)',
+                'crop': '🌱 Select Crop Type', 'get_recommendation': '🔍 Get Recommendations', 'current_temp': '🌡️ Current Temperature',
+                'weather_desc': '☁️ Weather Description', 'soil_moisture': '💧 Soil Moisture', 'soil_temp': '🌡️ Soil Temperature',
+                'recommendations': '📌 Recommendations', 'recommended_crop': '🌿 Recommended Crop', 'fertilizer': '🧪 Recommended Fertilizer',
+                'fertilizer_brand': '🏷️ Best & Cheap Fertilizer Brand', 'mixture_field': '🧱 Mixture Composition for Field',
+                'price_increase': '📈 Expected Price Value Increase', 'acre_mixture': '🌾 Mixture Composition per Acre'},
+
+    'Hindi': {'title': '🌾 कृषि अनुशंसा प्रणाली', 'location': '📍 अपना स्थान दर्ज करें (राज्य का नाम)',
+              'crop': '🌱 फसल प्रकार चुनें', 'get_recommendation': '🔍 अनुशंसाएँ प्राप्त करें', 'current_temp': '🌡️ वर्तमान तापमान',
+              'weather_desc': '☁️ मौसम विवरण', 'soil_moisture': '💧 मिट्टी की नमी', 'soil_temp': '🌡️ मिट्टी का तापमान',
+              'recommendations': '📌 अनुशंसाएँ', 'recommended_crop': '🌿 अनुशंसित फसल', 'fertilizer': '🧪 अनुशंसित उर्वरक',
+              'fertilizer_brand': '🏷️ सर्वश्रेष्ठ और सस्ता उर्वरक ब्रांड', 'mixture_field': '🧱 क्षेत्र के लिए मिश्रण संरचना',
+              'price_increase': '📈 अपेक्षित मूल्य वृद्धि', 'acre_mixture': '🌾 एकड़ प्रति मिश्रण संरचना'},
+
+    'Bengali': {'title': '🌾 কৃষি সুপারিশ ব্যবস্থা', 'location': '📍 আপনার অবস্থান লিখুন (রাজ্যের নাম)',
+                'crop': '🌱 ফসলের ধরন নির্বাচন করুন', 'get_recommendation': '🔍 প্রস্তাবনা পান',
+                'current_temp': '🌡️ বর্তমান তাপমাত্রা', 'weather_desc': '☁️ আবহাওয়ার বিবরণ', 'soil_moisture': '💧 মাটি আর্দ্রতা',
+                'soil_temp': '🌡️ মাটির তাপমাত্রা', 'recommendations': '📌 প্রস্তাবনা', 'recommended_crop': '🌿 প্রস্তাবিত ফসল',
+                'fertilizer': '🧪 প্রস্তাবিত সার', 'fertilizer_brand': '🏷️ সেরা ও সস্তা সার ব্র্যান্ড',
+                'mixture_field': '🧱 ক্ষেত্রের জন্য মিশ্রণ', 'price_increase': '📈 প্রত্যাশিত মূল্য বৃদ্ধি',
+                'acre_mixture': '🌾 একর প্রতি মিশ্রণ'},
+
+    # ⭐ NEW LANGUAGES ADDED ⭐
+    'Punjabi': {'title': '🌾 ਖੇਤੀ ਸਿਫ਼ਾਰਿਸ਼ ਪ੍ਰਣਾਲੀ', 'location': '📍 ਆਪਣਾ ਸੂਬਾ ਲਿਖੋ',
+                'crop': '🌱 ਫਸਲ ਦੀ ਕਿਸਮ ਚੁਣੋ', 'get_recommendation': '🔍 ਸਿਫ਼ਾਰਸ਼ਾਂ ਪ੍ਰਾਪਤ ਕਰੋ',
+                'current_temp': '🌡️ ਮੌਜੂਦਾ ਤਾਪਮਾਨ', 'weather_desc': '☁️ ਮੌਸਮ ਦਾ ਵੇਰਵਾ', 'soil_moisture': '💧 ਮਿੱਟੀ ਦੀ ਨਮੀ',
+                'soil_temp': '🌡️ ਮਿੱਟੀ ਦਾ ਤਾਪਮਾਨ', 'recommendations': '📌 ਸਿਫ਼ਾਰਸ਼ਾਂ', 'recommended_crop': '🌿 ਸਿਫ਼ਾਰਸ਼ ਕੀਤੀ ਫਸਲ',
+                'fertilizer': '🧪 ਸਿਫ਼ਾਰਸ਼ ਕੀਤਾ ਖਾਦ', 'fertilizer_brand': '🏷️ ਚੰਗਾ ਅਤੇ ਸਸਤਾ ਖਾਦ ਬ੍ਰਾਂਡ',
+                'mixture_field': '🧱 ਖੇਤ ਲਈ ਮਿਸ਼ਰਣ', 'price_increase': '📈 ਉਮੀਦ ਕੀਤੀ ਕੀਮਤ ਵਿੱਚ ਵਾਧਾ',
+                'acre_mixture': '🌾 ਇੱਕ ਏਕੜ ਲਈ ਮਿਸ਼ਰਣ'},
+
+    'Assamese': {'title': '🌾 কৃষি পৰামৰ্শ প্ৰণালী', 'location': '📍 আপোনাৰ অৱস্থান লিখক',
+                 'crop': '🌱 ফলৰ প্ৰকাৰ নিৰ্বাচন কৰক', 'get_recommendation': '🔍 পৰামৰ্শ লওক',
+                 'current_temp': '🌡️ বৰ্তমান তাপমাত্ৰা', 'weather_desc': '☁️ বতাহৰ বিৱৰণ',
+                 'soil_moisture': '💧 মাটিৰ আর্দ্ৰতা', 'soil_temp': '🌡️ মাটিৰ তাপমাত্ৰা',
+                 'recommended_crop': '🌿 পৰামৰ্শ দিয়া ফল', 'fertilizer': '🧪 পৰামৰ্শ দিয়া সাৰ',
+                 'fertilizer_brand': '🏷️ উত্তম আৰু সস্তা সাৰ ব্রাণ্ড', 'mixture_field': '🧱 ক্ষেত্ৰৰ মিশ্ৰণ',
+                 'price_increase': '📈 সম্ভাৱ্য মূল্য বৃদ্ধি', 'acre_mixture': '🌾 একেকৰ মিশ্ৰণ'},
+
+    'Konkani': {'title': '🌾 कृषी शिफारस प्रणाली', 'location': '📍 तुमचो राज्य नाव दियात',
+                'crop': '🌱 पीक प्रकार निवडात', 'get_recommendation': '🔍 शिफारस मेळो',
+                'current_temp': '🌡️ सद्या तापमान', 'weather_desc': '☁️ हवामान वर्णन',
+                'soil_moisture': '💧 माती ओलावा', 'soil_temp': '🌡️ माती तापमान',
+                'recommended_crop': '🌿 शिफारस पीक', 'fertilizer': '🧪 शिफारस खत',
+                'fertilizer_brand': '🏷️ उत्तम आणी स्वस्त खत ब्रँड', 'mixture_field': '🧱 क्षेत्र मिश्रण',
+                'price_increase': '📈 अपेक्षित भाव वाढ', 'acre_mixture': '🌾 एकर मिश्रण'},
+
+    'Sanskrit': {'title': '🌾 कृषि अनुशंसा प्रणाली', 'location': '📍 राज्यनाम लिखत',
+                 'crop': '🌱 कृषि-प्रकारं चिनोतु', 'get_recommendation': '🔍 अनुशंसाः प्राप्नु',
+                 'current_temp': '🌡️ वर्तमानतापमानम्', 'weather_desc': '☁️ मौसमवर्णनम्',
+                 'soil_moisture': '💧 भूमेः आर्द्रता', 'soil_temp': '🌡️ भूमेः तापमानम्',
+                 'recommended_crop': '🌿 अनुशंसितं धान्यम्', 'fertilizer': '🧪 अनुशंसितः उर्वरकः',
+                 'fertilizer_brand': '🏷️ उत्तमः सः सुलभः उर्वरकब्राण्डः',
+                 'mixture_field': '🧱 क्षेत्रस्य मिश्रणम्', 'price_increase': '📈 मूल्यवृद्धिः',
+                 'acre_mixture': '🌾 एकैकरे मिश्रणम्'}
 }
-# Add all your languages back
-language_translations.update(language_translations)
 
-# ---------------- API KEYS ----------------
-AGRO_API_KEY = '3b595ff753f913b88f558e67c2dc78d7'
-WEATHER_API_KEY = '7040ea904442a45d6950ba584410ce59'
+# ---------------------------
+#  🔑 API KEYS
+# ---------------------------
 
-# ---------------- LOAD CSV ----------------
+AGRO_API_KEY = 'YOUR_AGRO_API_KEY'
+WEATHER_API_KEY = 'YOUR_OPENWEATHER_API_KEY'
+
+# ---------------------------
+#  📂 LOAD CROP CSV
+# ---------------------------
+
 crop_data = pd.read_csv('crop2.csv', encoding='ISO-8859-1')
 
-# ---------------- UI START ----------------
-st.markdown("<h1 class='big-title'>🌿 Smart Multilingual Agriculture Advisor</h1>", unsafe_allow_html=True)
+# ---------------------------
+#  🌐 LANGUAGE SELECTION
+# ---------------------------
 
-# Language selector
-language = st.selectbox("🌍 Select Language", list(language_translations.keys()))
-lang_dict = language_translations.get(language)
+language = st.selectbox(
+    '🌐 Choose Language / भाषा चुनें',
+    list(language_translations.keys())
+)
 
-# LOCATION INPUT
-location = st.text_input(lang_dict['location'])
+lang = language_translations[language]
 
-col1, col2 = st.columns(2)
+# ---------------------------
+#  🌾 TITLE
+# ---------------------------
 
-with col1:
-    if location:
-        with st.container():
-            st.markdown("<div class='card'>", unsafe_allow_html=True)
-            st.subheader("🌦️ Live Weather Data")
+st.markdown(f"<h1 style='color:#2e8b57;text-align:center;'>{lang['title']}</h1>", unsafe_allow_html=True)
 
-            try:
-                weather_url = f"http://api.openweathermap.org/data/2.5/weather?q={location}&appid={WEATHER_API_KEY}&units=metric"
-                weather = requests.get(weather_url).json()
+# ---------------------------
+#  📍 LOCATION INPUT
+# ---------------------------
 
-                if "main" in weather:
-                    st.write(f"**{lang_dict['current_temp']}:** {weather['main']['temp']} °C")
-                    st.write(f"**{lang_dict['weather_desc']}:** {weather['weather'][0]['description']}")
+location = st.text_input(lang['location'])
 
-                    lat = weather['coord']['lat']
-                    lon = weather['coord']['lon']
+if location:
+    try:
+        weather_api_url = f"http://api.openweathermap.org/data/2.5/weather?q={location}&appid={WEATHER_API_KEY}&units=metric"
+        w = requests.get(weather_api_url).json()
 
-                    # Soil Data
-                    soil_url = f"https://api.agromonitoring.com/agro/1.0/soil?lat={lat}&lon={lon}&appid={AGRO_API_KEY}"
-                    soil = requests.get(soil_url).json()
+        if "main" in w:
+            st.success(f"{lang['current_temp']}: **{w['main']['temp']}°C**")
+            st.info(f"{lang['weather_desc']}: **{w['weather'][0]['description']}**")
 
-                    if "moisture" in soil:
-                        st.write(f"**{lang_dict['soil_moisture']}:** {soil['moisture']} %")
-                        st.write(f"**{lang_dict['soil_temp']}:** {soil['t0']} °C")
-                    else:
-                        st.error("❌ Soil data not available.")
-                else:
-                    st.error("❌ Weather data not available. Enter a valid state name.")
+            lat = w['coord']['lat']
+            lon = w['coord']['lon']
 
-            except Exception as e:
-                st.error(f"⚠️ Error: {e}")
+            soil_api_url = f"https://api.agromonitoring.com/agro/1.0/soil?lat={lat}&lon={lon}&appid={AGRO_API_KEY}"
+            s = requests.get(soil_api_url).json()
 
-            st.markdown("</div>", unsafe_allow_html=True)
+            if "moisture" in s:
+                st.warning(f"{lang['soil_moisture']}: **{s['moisture']}%**")
+                st.warning(f"{lang['soil_temp']}: **{s['t0']}°C**")
+        else:
+            st.error("⚠️ Invalid location!")
 
-# ---------------- CROP SELECTION ----------------
-with col2:
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    crop_options = crop_data['Recommended Crop'].unique()
-    selected_crop = st.selectbox(lang_dict['crop'], crop_options)
-    st.markdown("</div>", unsafe_allow_html=True)
+    except Exception as e:
+        st.error(f"❌ Error: {e}")
 
-# ---------------- RECOMMENDATIONS ----------------
-if st.button(lang_dict['get_recommendation']):
+# ---------------------------
+#  🌱 CROP SELECTION
+# ---------------------------
+
+crop_options = crop_data['Recommended Crop'].unique()
+selected_crop = st.selectbox(lang['crop'], crop_options)
+
+# ---------------------------
+#  🔍 SHOW RECOMMENDATIONS
+# ---------------------------
+
+if st.button(lang['get_recommendation']):
     data = crop_data[crop_data['Recommended Crop'] == selected_crop]
 
     if not data.empty:
-        st.markdown("<div class='card'>", unsafe_allow_html=True)
-        st.subheader("📌 Recommendation Results")
+        d = data.iloc[0]
 
-        st.write(f"**{lang_dict['recommended_crop']}:** 🌾 {selected_crop}")
-        st.write(f"**{lang_dict['fertilizer']}:** 🧪 {data['Recommended Fertilizer'].values[0]}")
-        st.write(f"**{lang_dict['fertilizer_brand']}:** 🏷️ {data['Best & Cheap Fertilizer Brand'].values[0]}")
-        st.write(f"**{lang_dict['mixture_field']}:** 🧬 {data['Mixture Composition for Field'].values[0]}")
-        st.write(f"**{lang_dict['price_increase']}:** 📈 {data['Expected Price Value Increase'].values[0]}")
-        st.write(f"**{lang_dict['acre_mixture']}:** 🌾 {data['Mixture Composition per Acre'].values[0]}")
+        st.subheader(lang['recommendations'])
 
-        st.markdown("</div>", unsafe_allow_html=True)
-
+        st.write(f"✅ **{lang['recommended_crop']}:** {selected_crop}")
+        st.write(f"🧪 **{lang['fertilizer']}:** {d['Recommended Fertilizer']}")
+        st.write(f"🏷️ **{lang['fertilizer_brand']}:** {d['Best & Cheap Fertilizer Brand']}")
+        st.write(f"🧱 **{lang['mixture_field']}:** {d['Mixture Composition for Field']}")
+        st.write(f"📈 **{lang['price_increase']}:** {d['Expected Price Value Increase']}")
+        st.write(f"🌾 **{lang['acre_mixture']}:** {d['Mixture Composition per Acre']}")
     else:
-        st.error("❌ No data available for this crop.")
+        st.error("❌ No data found for this crop.")
